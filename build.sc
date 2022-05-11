@@ -7,12 +7,12 @@ import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version_mill0.9:0.1.1`
 import de.tobiasroeser.mill.vcs.version.VcsVersion
 
 object ivys {
-  val chisel3 = ivy"edu.berkeley.cs::chisel3:3.4.3"
+  val chisel3 = ivy"edu.berkeley.cs::chisel3:3.5.3"
   val chisel3Plugin = ivy"edu.berkeley.cs:::chisel3-plugin:3.4.3"
   val sourcecode = ivy"com.lihaoyi::sourcecode:0.2.7"
   val utest = ivy"com.lihaoyi::utest:0.7.10"
   // TODO
-  val diplomacy = ivy"org.chipsalliance::diplomacy:0.0.0-327-252005"
+  // val diplomacy = ivy"org.chipsalliance::diplomacy:0.0.0-327-252005"
 }
 
 // TODO: add 2.13 after chisel publish to 2.13
@@ -22,6 +22,7 @@ class tilelink(val crossScalaVersion: String) extends GeneralChiselModule {
   override def ivyDeps = super.ivyDeps() ++ Agg(ivys.sourcecode)
 }
 
+/*
 object diplomaticTilelink extends mill.Cross[diplomaticTilelink]("2.12.13")
 
 class diplomaticTilelink(val crossScalaVersion: String) extends GeneralChiselModule {
@@ -29,6 +30,7 @@ class diplomaticTilelink(val crossScalaVersion: String) extends GeneralChiselMod
 
   override def ivyDeps = super.ivyDeps() ++ (if (diplomacyModule.isEmpty) Some(ivys.diplomacy) else None)
 }
+*/
 
 trait GeneralChiselModule extends CrossScalaModule with ScalafmtModule with PublishModule {
   def chisel3Module: Option[PublishModule] = None
