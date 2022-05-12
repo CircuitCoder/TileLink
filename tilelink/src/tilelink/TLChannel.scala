@@ -1,9 +1,13 @@
 package tilelink
 
 import chisel3._
+import Chisel.log2Up
 
 /** Parameter for [[TLChannel]] */
-trait TLChannelParameter
+trait TLChannelParameter {
+  // Maximum beatsPow
+  def maxBeatsPow: Int
+}
 
 /** TileLink Spec 1.8.1 Table 14
   *
@@ -21,6 +25,10 @@ trait TLChannelParameter
   */
 trait TLChannel extends Bundle {
   val channelParameter: TLChannelParameter
+
+  // Beats in current transfer, repersented in power-of-two
+  // The beat count is 2^beatsPow
+  def beatsPow: UInt
 }
 
 trait TLMasterToSlaveChannel extends TLChannel
@@ -45,6 +53,8 @@ trait TLDataChannelParameter extends TLChannelParameter {
 
   /** Size of bytes can be transferred on [[TLDataChannel]] for each beat of message. */
   def beatBytes: Int = dataWidth / 8
+
+  def maxBeatsPow: Int = (BigInt(2).pow(sizeWidth) - 1 - log2Up(beatBytes)).max(0).intValue()
 }
 
 trait TLDataChannel extends TLChannel {
@@ -54,6 +64,8 @@ trait TLDataChannel extends TLChannel {
   val corrupt: Option[Bool] =
     if (channelParameter.hasCorrupt) Some(Bool())
     else None
+  
+  def beatsPow: UInt = (size - log2Up(channelParameter.beatBytes).U).max(0.U)
 }
 
 /** Apply to AB channel. */
@@ -325,6 +337,7 @@ trait TLChannelD
 
 /** TileLink E Channel, refer to Spec 3.7 */
 trait TLChannelEParameter extends TLChannelParameter with TLSinkChannelParameter { p =>
+  def maxBeatsPow: Int = 0
 
   /** Notice: for custom transaction and parameter,
     * this should be override to provide a custom transaction,
@@ -347,4 +360,7 @@ trait TLChannelE
     with TLSinkChannel
     with TLMasterToSlaveChannel {
   override val channelParameter: TLChannelEParameter
+
+  // TL Channel E always have a single beat
+  override def beatsPow: UInt = 0.U
 }

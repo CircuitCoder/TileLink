@@ -2,6 +2,14 @@ import chisel3._
 import chisel3.util.experimental._
 import tilelink._
 import chisel3.util.BitPat
+import chisel3.util.experimental.decode.TruthTable
+
+private object helper {
+  def oneSetBitPat(len: Int, at: Int): BitPat = {
+    val digits = Seq.tabulate(len)(idx => if(idx == at) "1" else "0")
+    BitPat("b" + digits.mkString)
+  }
+}
 
 class Crossbar(
   nInputs: Int,
@@ -10,16 +18,35 @@ class Crossbar(
   outputRanges: Iterable[BitSet],
   param: TLBundleParameter
 ) extends Module {
+  require(nInputs > 0 && nOutputs > 0)
+
   val inputs = for(i <- 0 until nInputs) yield IO(TLBundle.decoupled(param))
   val outputs = for(i <- 0 until nOutputs) yield IO(Flipped(TLBundle.decoupled(param)))
 
+  val ranges = inputRanges.toSeq
   val entries = outputRanges.toSeq
+
+  require(ranges.length == nInputs)
+  require(entries.length == nOutputs)
 
   // Check all tbl entries are disjoint
   for(i <- 0 until entries.length)
     for(j <- 0 until entries.length)
       if(i != j)
         require(!entries(i).overlap(entries(j)), s"Address for output $i and $j are intersecting")
+  
+  // For each input, multiply it into (at most) nOutputs endpoints
+  for((input, rng) <- inputs.zip(inputRanges)) {
+    // First, build connectivity matrixes
+    val connectivity = for(ent <- entries) yield rng.overlap(ent)
+
+    // Second, build decoder
+    val effectiveEntries = entries.zipWithIndex.flatMap({ case (ent, idx) =>
+      if(connectivity(idx)) ent.terms.map(term => term -> helper.oneSetBitPat(nOutputs, idx)) else Seq() }
+    )
+    val truthTbl = TruthTable(effectiveEntries, BitPat.N(nOutputs))
+    val towards = chisel3.util.experimental.decode.decoder.qmc(input.a.bits.address, truthTbl)
+  }
 }
 
 case class CrossbarBuilder(
