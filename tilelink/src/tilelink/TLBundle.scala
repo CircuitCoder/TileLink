@@ -21,28 +21,18 @@ case class TLBundleParameter(
 
 class TLDecoupledBundle(val bundleParameter: TLBundleParameter) extends Record {
   // TL-UL and TL-UH
-  lazy val a: DecoupledIO[TLChannelA] = Decoupled(new TLChannelA {
-    override val channelParameter: TLChannelAParameter = bundleParameter.a
-  })
-  lazy val d: DecoupledIO[TLChannelD] = Flipped(Decoupled(new TLChannelD {
-    override val channelParameter: TLChannelDParameter = bundleParameter.d
-  }))
+  lazy val a: DecoupledIO[TLChannelA] = Decoupled(new TLChannelA(bundleParameter.a))
+  lazy val d: DecoupledIO[TLChannelD] = Flipped(Decoupled(new TLChannelD(bundleParameter.d)))
 
   // TL-C, lazy val will be instantiate at evaluating [[elements]] or user call them by mistake.
   lazy val b: DecoupledIO[TLChannelB] =
-    if (bundleParameter.isTLC) Flipped(Decoupled(new TLChannelB {
-      override val channelParameter: TLChannelBParameter = bundleParameter.b.get
-    }))
+    if (bundleParameter.isTLC) Flipped(Decoupled(new TLChannelB(bundleParameter.b.get)))
     else throw TLCNotInThisBundle(bundleParameter)
   lazy val c: DecoupledIO[TLChannelC] =
-    if (bundleParameter.isTLC) Flipped(Decoupled(new TLChannelC {
-      override val channelParameter: TLChannelCParameter = bundleParameter.c.get
-    }))
+    if (bundleParameter.isTLC) Flipped(Decoupled(new TLChannelC(bundleParameter.c.get)))
     else throw TLCNotInThisBundle(bundleParameter)
   lazy val e: DecoupledIO[TLChannelE] =
-    if (bundleParameter.isTLC) Flipped(Decoupled(new TLChannelE {
-      override val channelParameter: TLChannelEParameter = bundleParameter.e.get
-    }))
+    if (bundleParameter.isTLC) Flipped(Decoupled(new TLChannelE(bundleParameter.e.get)))
     else throw TLCNotInThisBundle(bundleParameter)
 
   override val elements: ListMap[String, DecoupledIO[TLChannel]] =

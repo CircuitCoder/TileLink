@@ -156,9 +156,7 @@ trait TLChannelAParameter
     data:    UInt,
     corrupt: Bool
   ): TLChannelA = {
-    val a: TLChannelA = Wire(new TLChannelA {
-      override val channelParameter: TLChannelAParameter = p
-    })
+    val a: TLChannelA = Wire(new TLChannelA(p))
     a.opcode := opcode
     a.param := param
     a.size := size
@@ -171,7 +169,7 @@ trait TLChannelAParameter
   }
 }
 
-trait TLChannelA
+class TLChannelA(override val channelParameter: TLChannelAParameter)
     extends TLChannel
     with TLOpcodeChannel
     // Request provides `a.source` for use as `d.source`
@@ -180,9 +178,7 @@ trait TLChannelA
     with TLAddressChannel
     with TLMaskChannel
     with TLDataChannel
-    with TLMasterToSlaveChannel {
-  override val channelParameter: TLChannelAParameter
-}
+    with TLMasterToSlaveChannel
 
 /** TileLink B Channel, refer to Spec 3.4 */
 trait TLChannelBParameter
@@ -207,9 +203,7 @@ trait TLChannelBParameter
     data:    UInt,
     corrupt: Bool
   ): TLChannelB = {
-    val b: TLChannelB = Wire(new TLChannelB {
-      override val channelParameter: TLChannelBParameter = p
-    })
+    val b: TLChannelB = Wire(new TLChannelB(p))
     b.opcode := opcode
     b.param := param
     b.size := size
@@ -222,7 +216,7 @@ trait TLChannelBParameter
   }
 }
 
-trait TLChannelB
+class TLChannelB(override val channelParameter: TLChannelBParameter)
     extends TLChannel
     with TLOpcodeChannel
     // Request routed by `b.source`
@@ -231,9 +225,7 @@ trait TLChannelB
     with TLAddressChannel
     with TLMaskChannel
     with TLDataChannel
-    with TLSlaveToMasterChannel {
-  override val channelParameter: TLChannelBParameter
-}
+    with TLSlaveToMasterChannel
 
 /** TileLink C Channel, refer to Spec 3.5 */
 trait TLChannelCParameter
@@ -256,9 +248,7 @@ trait TLChannelCParameter
     data:    UInt,
     corrupt: Bool
   ): TLChannelC = {
-    val c: TLChannelC = Wire(new TLChannelC {
-      override val channelParameter: TLChannelCParameter = p
-    })
+    val c: TLChannelC = Wire(new TLChannelC(p))
     c.opcode := opcode
     c.param := param
     c.size := size
@@ -270,7 +260,7 @@ trait TLChannelCParameter
   }
 }
 
-trait TLChannelC
+class TLChannelC(override val channelParameter: TLChannelCParameter)
     extends TLChannel
     with TLOpcodeChannel
     // Request provides `c.source` for use as `d.source`
@@ -279,9 +269,7 @@ trait TLChannelC
     // Request routed by `c.address`
     with TLAddressChannel
     with TLDataChannel
-    with TLMasterToSlaveChannel {
-  override val channelParameter: TLChannelCParameter
-}
+    with TLMasterToSlaveChannel
 
 /** TileLink D Channel, refer to Spec 3.6 */
 trait TLChannelDParameter
@@ -306,9 +294,7 @@ trait TLChannelDParameter
     data:    UInt,
     corrupt: Bool
   ): TLChannelD = {
-    val d: TLChannelD = Wire(new TLChannelD {
-      override val channelParameter: TLChannelDParameter = p
-    })
+    val d: TLChannelD = Wire(new TLChannelD(p))
     d.opcode := opcode
     d.param := param
     d.size := size
@@ -321,7 +307,7 @@ trait TLChannelDParameter
   }
 }
 
-trait TLChannelD
+class TLChannelD(override val channelParameter: TLChannelDParameter)
     extends TLChannel
     with TLOpcodeChannel
     // Response routed by `d.source` provided by `a.source`
@@ -331,9 +317,7 @@ trait TLChannelD
     with TLSinkChannel
     with TLDataChannel
     with TLDeniedChannel
-    with TLSlaveToMasterChannel {
-  override val channelParameter: TLChannelDParameter
-}
+    with TLSlaveToMasterChannel
 
 /** TileLink E Channel, refer to Spec 3.7 */
 trait TLChannelEParameter extends TLChannelParameter with TLSinkChannelParameter { p =>
@@ -346,21 +330,17 @@ trait TLChannelEParameter extends TLChannelParameter with TLSinkChannelParameter
   def assign(
     sink: UInt
   ): TLChannelE = {
-    val e: TLChannelE = Wire(new TLChannelE {
-      override val channelParameter: TLChannelEParameter = p
-    })
+    val e: TLChannelE = Wire(new TLChannelE(p))
     e.sink := sink
     e
   }
 }
 
-trait TLChannelE
+class TLChannelE(override val channelParameter: TLChannelEParameter)
     extends TLChannel
     // Response routed by `e.sink`
     with TLSinkChannel
     with TLMasterToSlaveChannel {
-  override val channelParameter: TLChannelEParameter
-
   // TL Channel E always have a single beat
   override def beatsPow: UInt = 0.U
 }

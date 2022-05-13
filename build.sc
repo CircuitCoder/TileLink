@@ -8,7 +8,7 @@ import de.tobiasroeser.mill.vcs.version.VcsVersion
 
 object ivys {
   val chisel3 = ivy"edu.berkeley.cs::chisel3:3.5.3"
-  val chisel3Plugin = ivy"edu.berkeley.cs:::chisel3-plugin:3.4.3"
+  val chisel3Plugin = ivy"edu.berkeley.cs:::chisel3-plugin:3.5.3"
   val sourcecode = ivy"com.lihaoyi::sourcecode:0.2.7"
   val utest = ivy"com.lihaoyi::utest:0.7.10"
   // TODO
